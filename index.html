@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>FNF工具箱</title>
+	<style>
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+		}
+
+		body {
+			background: linear-gradient(135deg, #0a0e2a 0%, #1a1f4b 50%, #0a0e2a 100%);
+			color: #e6f1ff;
+			font-family: 'Segoe UI', 'Arial', sans-serif;
+			min-height: 100vh;
+			padding: 20px;
+			position: relative;
+			overflow-x: auto;
+			min-width: 1200px;
+		}
+
+		body::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: 
+				radial-gradient(circle at 20% 30%, rgba(0, 255, 255, 0.2) 0%, transparent 50%),
+				radial-gradient(circle at 80% 70%, rgba(255, 0, 255, 0.2) 0%, transparent 50%),
+				radial-gradient(circle at 40% 80%, rgba(0, 255, 200, 0.15) 0%, transparent 50%),
+				radial-gradient(circle at 60% 20%, rgba(255, 255, 0, 0.1) 0%, transparent 50%),
+				radial-gradient(circle at 30% 60%, rgba(255, 0, 128, 0.1) 0%, transparent 50%);
+			z-index: -1;
+			animation: backgroundShift 15s ease-in-out infinite alternate;
+		}
+
+		@keyframes backgroundShift {
+			0% { background-position: 0% 0%; }
+			100% { background-position: 100% 100%; }
+		}
+
+		body::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-image: 
+				linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+				linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+				linear-gradient(rgba(255, 0, 255, 0.05) 2px, transparent 2px),
+				linear-gradient(90deg, rgba(255, 0, 255, 0.05) 2px, transparent 2px);
+			background-size: 50px 50px, 50px 50px, 100px 100px, 100px 100px;
+			z-index: -1;
+			animation: gridMove 20s linear infinite;
+		}
+
+		@keyframes gridMove {
+			0% { background-position: 0 0, 0 0, 0 0, 0 0; }
+			100% { background-position: 50px 50px, 50px 50px, 100px 100px, 100px 100px; }
+		}
+
+		.glass-effect {
+			background: rgba(16, 22, 58, 0.25);
+			backdrop-filter: blur(15px) saturate(180%);
+			-webkit-backdrop-filter: blur(15px) saturate(180%);
+			border: 1px solid rgba(255, 255, 255, 0.18);
+			box-shadow: 
+				0 8px 32px 0 rgba(0, 255, 255, 0.2),
+				inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+		}
+
+		body:not(.quality-effect-ultra) .glass-effect {
+			background: rgba(16, 22, 58, 0.85);
+			backdrop-filter: none;
+			-webkit-backdrop-filter: none;
+			border: 1px solid rgba(0, 255, 255, 0.3);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+		}
+
+		body:not(.quality-effect-ultra) .glow-border::before {
+			display: none;
+		}
+
+		.glow-border {
+			position: relative;
+		}
+
+		.glow-border::before {
+			content: '';
+			position: absolute;
+			top: -2px;
+			left: -2px;
+			right: -2px;
+			bottom: -2px;
+			background: linear-gradient(45deg, #00ffff, #ff00ff, #00ffff, #ff00ff);
+			border-radius: inherit;
+			z-index: -1;
+			opacity: 0.7;
+			filter: blur(10px);
+			animation: borderGlow 3s ease-in-out infinite alternate;
+		}
+
+		@keyframes borderGlow {
+			0% { opacity: 0.4; filter: blur(8px); }
+			100% { opacity: 0.8; filter: blur(12px); }
+		}
+
+		.light-spots::after {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: 
+				radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
+				radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.2) 0%, transparent 50%);
+			z-index: -1;
+			animation: lightMove 10s ease-in-out infinite;
+		}
+
+		@keyframes lightMove {
+			0%, 100% { transform: translate(0, 0) scale(1); }
+			25% { transform: translate(10px, -10px) scale(1.1); }
+			50% { transform: translate(-5px, 5px) scale(0.9); }
+			75% { transform: translate(-10px, -5px) scale(1.05); }
+		}
+
+		.container {
+			width: 1200px;
+			margin: 0 auto;
+			position: relative;
+		}
+
+		header {
+			text-align: center;
+			margin-bottom: 40px;
+			padding: 20px;
+			position: relative;
+			border-radius: 15px;
+		}
+
+		h1 {
+			font-size: 2.8rem;
+			background: linear-gradient(90deg, #00ffff, #ff00ff, #00ffff);
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+			text-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+			margin-bottom: 10px;
+			font-weight: 700;
+			letter-spacing: 2px;
+			position: relative;
+			display: inline-block;
+			animation: titleGlow 3s ease-in-out infinite alternate;
+		}
+
+		@keyframes titleGlow {
+			0% { text-shadow: 0 0 20px rgba(0, 255, 255, 0.7); }
+			100% { text-shadow: 0 0 30px rgba(255, 0, 255, 0.7), 0 0 40px rgba(0, 255, 255, 0.5); }
+		}
+
+		h1::after {
+			content: '';
+			position: absolute;
+			bottom: -5px;
+			left: 10%;
+			width: 80%;
+			height: 3px;
+			background: linear-gradient(90deg, transparent, #00ffff, #ff00ff, #00ffff, transparent);
+			border-radius: 3px;
+			animation: linePulse 2s ease-in-out infinite;
+		}
+
+		@keyframes linePulse {
+			0%, 100% { opacity: 0.7; }
+			50% { opacity: 1; }
+		}
+
+		.subtitle {
+			font-size: 1.2rem;
+			color: #a0a8cc;
+			margin-top: 10px;
+		}
+
+		.version-info {
+			position: absolute;
+			top: 25px;
+			left: 20px;
+			background: linear-gradient(135deg, #00ffff, #ff00ff);
+			color: #0a0e2a;
+			padding: 8px 16px;
+			border-radius: 20px;
+			font-size: 0.9rem;
+			font-weight: bold;
+			box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+			font-family: monospace;
+			animation: pulse 2s infinite;
+		}
+
+		@keyframes pulse {
+			0% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); }
+			50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 255, 0.8); }
+			100% { transform: scale(1); box-shadow: 0 0 15px rgba(0, 255, 255, 0.5); }
+		}
+
+		.tool-selection {
+			display: grid;
+			grid-template-columns: repeat(4, 1fr);
+			gap: 30px;
+			margin-top: 40px;
+		}
+
+		.tool-card {
+			border-radius: 15px;
+			padding: 30px;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.4s ease;
+			height: 200px;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			position: relative;
+			overflow: hidden;
+		}
+
+		.tool-card::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
+			transition: left 0.7s;
+		}
+
+		.tool-card:hover::before {
+			left: 100%;
+		}
+
+		.tool-card:hover {
+			transform: translateY(-10px) scale(1.02);
+		}
+
+		.tool-name {
+			font-size: 1.8rem;
+			background: linear-gradient(90deg, #00ffff, #a855f7);
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+			margin-bottom: 15px;
+			font-weight: 600;
+			text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+		}
+
+		.tool-description {
+			color: #a0a8cc;
+			font-size: 1rem;
+			line-height: 1.5;
+		}
+
+		.enhanced-btn {
+			position: relative;
+			overflow: hidden;
+			background: linear-gradient(135deg, rgba(0, 255, 255, 0.8), rgba(168, 85, 247, 0.8));
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			transition: all 0.3s ease;
+			color: #0a0e2a;
+			border: none;
+			padding: 12px 25px;
+			border-radius: 8px;
+			font-size: 1rem;
+			font-weight: bold;
+			cursor: pointer;
+			box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+		}
+
+		.enhanced-btn::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+			transition: left 0.5s;
+		}
+
+		.enhanced-btn:hover::before {
+			left: 100%;
+		}
+
+		.enhanced-btn:hover {
+			transform: translateY(-3px);
+			box-shadow: 
+				0 8px 25px rgba(0, 255, 255, 0.6),
+				0 0 20px rgba(255, 0, 255, 0.4);
+		}
+
+		.clear-btn {
+			background: linear-gradient(135deg, rgba(255, 107, 107, 0.8), rgba(255, 71, 87, 0.8));
+			box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+		}
+
+		.clear-btn:hover {
+			box-shadow: 
+				0 8px 25px rgba(255, 107, 107, 0.6),
+				0 0 20px rgba(255, 71, 87, 0.4);
+		}
+
+		.settings-btn {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+			background: transparent;
+			border: 2px solid #00ffff;
+			color: #00ffff;
+			box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+		}
+
+		.settings-btn:hover {
+			background: rgba(0, 255, 255, 0.1);
+		}
+
+		.engine-selection {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 30px;
+			margin-bottom: 40px;
+		}
+
+		.engine-card {
+			border-radius: 15px;
+			padding: 30px;
+			text-align: center;
+			cursor: pointer;
+			transition: all 0.3s ease;
+		}
+
+		.engine-card:hover {
+			transform: translateY(-5px);
+		}
+
+		.engine-card.active {
+			background: rgba(26, 32, 68, 0.9);
+		}
+
+		.engine-name {
+			font-size: 1.8rem;
+			background: linear-gradient(90deg, #00ffff, #a855f7);
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+			margin-bottom: 15px;
+			font-weight: 600;
+			text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+		}
+
+		.converter-container, .splitter-container, .developing-container {
+			border-radius: 15px;
+			padding: 40px;
+			display: none;
+		}
+
+		.converter-container.active, .splitter-container.active, .developing-container.active {
+			display: block;
+		}
+
+		.conversion-type {
+			margin-bottom: 30px;
+			text-align: center;
+		}
+
+		.conversion-title {
+			font-size: 1.8rem;
+			background: linear-gradient(90deg, #00ffff, #a855f7);
+			-webkit-background-clip: text;
+			background-clip: text;
+			color: transparent;
+			margin-bottom: 10px;
+			font-weight: 600;
+			text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+		}
+
+		.converter-grid, .splitter-grid {
+			display: grid;
+			grid-template-columns: 1fr 1fr;
+			gap: 30px;
+			align-items: start;
+		}
+
+		.input-section, .output-section {
+			background: rgba(10, 14, 42, 0.9);
+			border-radius: 10px;
+			padding: 25px;
+			border: 1px solid rgba(0, 255, 255, 0.4);
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+		}
+
+		.section-title {
+			color: #00ffff;
+			font-size: 1.3rem;
+			margin-bottom: 20px;
+			border-bottom: 2px solid rgba(0, 255, 255, 0.4);
+			padding-bottom: 10px;
+			text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+		}
+
+		.input-group {
+			margin-bottom: 20px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 8px;
+			color: #00ffff;
+			font-weight: bold;
+			text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+		}
+
+		.enhanced-input {
+			background: rgba(16, 22, 58, 0.6);
+			backdrop-filter: blur(10px);
+			border: 1px solid rgba(0, 255, 255, 0.3);
+			transition: all 0.3s ease;
+			width: 100%;
+			padding: 12px;
+			border-radius: 8px;
+			color: #e6f1ff;
+			font-size: 1rem;
+		}
+
+		.enhanced-input:focus {
+			background: rgba(16, 22, 58, 0.8);
+			border-color: #00ffff;
+			box-shadow: 
+				0 0 15px rgba(0, 255, 255, 0.6),
+				inset 0 0 10px rgba(0, 255, 255, 0.1);
+			outline: none;
+		}
+
+		textarea.enhanced-input {
+			min-height: 400px;
+			resize: vertical;
+			font-family: monospace;
+			line-height: 1.4;
+		}
+
+		.button-group {
+			display: flex;
+			gap: 15px;
+			margin-top: 25px;
+		}
+
+		.copy-btn {
+			background: rgba(16, 22, 58, 0.9);
+			color: #00ffff;
+			border: 1px solid #00ffff;
+			padding: 8px 16px;
+			border-radius: 6px;
+			font-size: 0.9rem;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			margin-top: 10px;
+			box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+		}
+
+		.copy-btn:hover {
+			background: rgba(0, 255, 255, 0.1);
+		}
+
+		.json-output-section {
+			margin-top: 20px;
+			display: none;
+		}
+
+		.json-output-section.active {
+			display: block;
+		}
+
+		.output-content {
+			background: rgba(16, 22, 58, 0.9);
+			border: 1px solid rgba(0, 255, 255, 0.4);
+			border-radius: 8px;
+			padding: 15px;
+			min-height: 400px;
+			color: #a8b2d1;
+			font-family: monospace;
+			white-space: pre-wrap;
+			line-height: 1.4;
+			overflow-x: auto;
+			display: none;
+			cursor: text;
+			user-select: text;
+		}
+
+		.output-content.active {
+			display: block;
+		}
+
+		.modal {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.8);
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.modal.active {
+			display: flex;
+		}
+
+		.modal-content {
+			border-radius: 15px;
+			padding: 30px;
+			width: 500px;
+			max-height: 90vh;
+			overflow-y: auto;
+		}
+
+		.modal-title {
+			color: #00ffff;
+			font-size: 1.5rem;
+			margin-bottom: 20px;
+			text-align: center;
+			text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+		}
+
+		.settings-tabs {
+			display: flex;
+			margin-bottom: 20px;
+			border-bottom: 1px solid rgba(0, 255, 255, 0.4);
+		}
+
+		.settings-tab {
+			padding: 10px 20px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			border-bottom: 2px solid transparent;
+		}
+
+		.settings-tab.active {
+			border-bottom: 2px solid #00ffff;
+			color: #00ffff;
+		}
+
+		.settings-tab:hover {
+			color: #00ffff;
+		}
+
+		.settings-content {
+			display: none;
+		}
+
+		.settings-content.active {
+			display: block;
+		}
+
+		.credits-list {
+			list-style-type: none;
+			margin-top: 20px;
+		}
+
+		.credits-item {
+			padding: 10px;
+			margin-bottom: 10px;
+			background: rgba(10, 14, 42, 0.9);
+			border-radius: 6px;
+			border-left: 3px solid #00ffff;
+		}
+
+		.credits-link {
+			color: #00ffff;
+			text-decoration: none;
+			transition: all 0.3s ease;
+		}
+
+		.credits-link:hover {
+			text-decoration: underline;
+			text-shadow: 0 0 5px rgba(0, 255, 255, 0.5);
+		}
+
+		.checkbox-group {
+			margin-bottom: 20px;
+		}
+
+		.checkbox-label {
+			display: flex;
+			align-items: center;
+			cursor: pointer;
+		}
+
+		.checkbox-input {
+			margin-right: 10px;
+			width: 18px;
+			height: 18px;
+			accent-color: #00ffff;
+		}
+
+		.file-upload-section {
+			margin-bottom: 20px;
+		}
+
+		.file-input {
+			display: none;
+		}
+
+		.file-label {
+			display: inline-block;
+			padding: 12px 25px;
+			border-radius: 8px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			font-weight: bold;
+			margin-bottom: 10px;
+		}
+
+		.upload-status {
+			margin-top: 10px;
+			color: #a0a8cc;
+			font-size: 0.9rem;
+		}
+
+		.animation-controls {
+			margin-top: 20px;
+			display: flex;
+			gap: 10px;
+			align-items: center;
+			flex-wrap: wrap;
+		}
+
+		.control-btn:disabled {
+			background: rgba(16, 22, 58, 0.5);
+			color: #a0a8cc;
+			border: 1px solid #a0a8cc;
+			cursor: not-allowed;
+			box-shadow: none;
+		}
+
+		.control-btn:disabled:hover {
+			transform: none;
+			box-shadow: none;
+		}
+
+		.control-btn:disabled::before {
+			display: none;
+		}
+
+		.download-btn:disabled {
+			background: rgba(16, 22, 58, 0.5);
+			color: #a0a8cc;
+			cursor: not-allowed;
+			box-shadow: none;
+		}
+
+		.download-btn:disabled:hover {
+			transform: none;
+			box-shadow: none;
+		}
+
+		.download-btn:disabled::before {
+			display: none;
+		}
+
+		.fps-control {
+			display: flex;
+			align-items: center;
+			gap: 10px;
+		}
+
+		.fps-input {
+			width: 60px;
+			padding: 5px;
+			background: rgba(16, 22, 58, 0.9);
+			border: 1px solid rgba(0, 255, 255, 0.4);
+			border-radius: 4px;
+			color: #e6f1ff;
+		}
+
+		.canvas-container {
+			width: 100%;
+			height: 400px;
+			background: rgba(10, 14, 42, 0.9);
+			border: 1px solid rgba(0, 255, 255, 0.4);
+			border-radius: 8px;
+			overflow: hidden;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+		}
+
+		.animation-canvas {
+			max-width: 100%;
+			max-height: 100%;
+		}
+
+		.animation-group {
+			margin-bottom: 15px;
+			border: 1px solid rgba(0, 255, 255, 0.4);
+			border-radius: 8px;
+			overflow: hidden;
+		}
+
+		.animation-header {
+			padding: 12px;
+			background: rgba(26, 32, 68, 0.9);
+			cursor: pointer;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			transition: all 0.3s ease;
+		}
+
+		.animation-header:hover {
+			background: rgba(0, 255, 255, 0.15);
+		}
+
+		.animation-header.active {
+			background: rgba(0, 255, 255, 0.25);
+			color: #00ffff;
+		}
+
+		.animation-name {
+			font-weight: bold;
+			color: #00ffff;
+		}
+
+		.toggle-icon {
+			font-size: 1.2rem;
+			transition: transform 0.3s ease;
+			color: #00ffff;
+		}
+
+		.animation-header.active .toggle-icon {
+			transform: rotate(180deg);
+		}
+
+		.frame-list {
+			max-height: 0;
+			overflow: hidden;
+			transition: max-height 0.3s ease;
+			background: rgba(10, 14, 42, 0.9);
+		}
+
+		.animation-header.active + .frame-list {
+			max-height: 300px;
+		}
+
+		.frame-item {
+			padding: 8px 12px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			border-bottom: 1px solid rgba(0, 255, 255, 0.15);
+		}
+
+		.frame-item:last-child {
+			border-bottom: none;
+		}
+
+		.frame-item:hover {
+			background: rgba(0, 255, 255, 0.15);
+		}
+
+		.frame-item.active {
+			background: rgba(0, 255, 255, 0.25);
+			color: #00ffff;
+		}
+
+		.notification {
+			position: fixed;
+			bottom: 20px;
+			left: 50%;
+			transform: translateX(-50%);
+			background: rgba(16, 22, 58, 0.95);
+			color: #00ffff;
+			padding: 15px 25px;
+			border-radius: 8px;
+			border: 1px solid #00ffff;
+			box-shadow: 0 5px 20px rgba(0, 255, 255, 0.6);
+			z-index: 1001;
+			opacity: 0;
+			transition: opacity 0.3s ease;
+			backdrop-filter: blur(10px);
+		}
+
+		.notification.active {
+			opacity: 1;
+		}
+
+		.developing-message {
+			text-align: center;
+			padding: 60px 20px;
+			color: #a0a8cc;
+			font-size: 1.2rem;
+		}
+
+		.warning-message {
+			background: rgba(255, 107, 107, 0.3);
+			border: 1px solid rgba(255, 107, 107, 0.6);
+			border-radius: 8px;
+			padding: 15px;
+			margin: 15px 0;
+			color: #ff6b6b;
+			text-align: center;
+			box-shadow: 0 0 15px rgba(255, 107, 107, 0.4);
+		}
+	</style>
+</head>
+<body class="quality-effect-medium">
+	<div class="container">
+		<header class="glass-effect glow-border light-spots">
+			<h1 id="main-title">FNF工具箱</h1>
+			<p class="subtitle" id="main-subtitle">选择您需要的工具</p>
+			<div class="version-info">版本: 0.7.0</div>
+			<button class="settings-btn enhanced-btn" onclick="openSettings()">设置</button>
+		</header>
+
+		<div class="homepage" id="homepage">
+			<div class="tool-selection">
+				<div class="tool-card glass-effect glow-border" onclick="selectTool('converter')">
+					<div class="tool-name">转换器</div>
+					<p class="tool-description">FNF文件格式转换工具，支持JSON、XML和LUA格式互转</p>
+				</div>
+
+				<div class="tool-card glass-effect glow-border" onclick="selectTool('splitter')">
+					<div class="tool-name">分割帧动画</div>
+					<p class="tool-description">贴图帧分割工具，支持PNG图片和XML动画数据分割</p>
+				</div>
+
+				<div class="tool-card glass-effect glow-border" onclick="selectTool('developing')">
+					<div class="tool-name">正在研发中</div>
+					<p class="tool-description">更多功能即将推出</p>
+				</div>
+
+				<div class="tool-card glass-effect glow-border" onclick="selectTool('developing')">
+					<div class="tool-name">正在研发中</div>
+					<p class="tool-description">更多功能即将推出</p>
+				</div>
+			</div>
+		</div>
+
+		<div class="converter-container glass-effect glow-border" id="converter-container">
+			<div class="conversion-type">
+				<div class="conversion-title">FNF文件转换器</div>
+			</div>
+
+			<button class="back-btn enhanced-btn" onclick="goHome()">返回主页</button>
+
+			<div class="engine-selection">
+				<div class="engine-card glass-effect glow-border active" onclick="selectEngine('codename')">
+					<div class="engine-name">Codename Engine</div>
+				</div>
+
+				<div class="engine-card glass-effect glow-border" onclick="selectEngine('psych')">
+					<div class="engine-name">Psych Engine</div>
+				</div>
+			</div>
+
+			<div class="converter-container active" id="codename-converter">
+				<div class="conversion-type">
+					<div class="conversion-title">JSON → XML 转换</div>
+				</div>
+
+				<div class="converter-grid">
+					<div class="input-section">
+						<div class="section-title">输入</div>
+						<textarea 
+							id="codename-input" 
+							class="enhanced-input" 
+							placeholder="在此处粘贴 JSON 数据"
+						></textarea>
+
+						<div class="button-group">
+							<button class="convert-btn enhanced-btn" onclick="convertCodename()">转换</button>
+							<button class="clear-btn enhanced-btn" onclick="clearCodename()">清空</button>
+						</div>
+					</div>
+
+					<div class="output-section">
+						<div class="section-title">输出</div>
+						<div class="output-content active" id="codename-output"></div>
+						<button class="copy-btn" onclick="selectOutput('codename-output')">选择输出内容</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="converter-container" id="psych-converter">
+				<div class="conversion-type">
+					<div class="conversion-title">Psych Engine 转换</div>
+				</div>
+
+				<div class="input-group">
+					<label for="psych-conversion-type">选择转换类型</label>
+					<select id="psych-conversion-type" class="enhanced-input" onchange="updatePsychOutput()">
+						<option value="xml-to-json">XML → JSON 人物</option>
+						<option value="xml-to-lua">XML → LUA 背景</option>
+					</select>
+				</div>
+
+				<div class="converter-grid">
+					<div class="input-section">
+						<div class="section-title">输入</div>
+						<textarea 
+							id="psych-input" 
+							class="enhanced-input" 
+							placeholder="在此处粘贴人物 XML 数据"
+						></textarea>
+
+						<div class="button-group">
+							<button class="convert-btn enhanced-btn" onclick="convertPsych()">转换</button>
+							<button class="clear-btn enhanced-btn" onclick="clearPsych()">清空</button>
+						</div>
+					</div>
+
+					<div class="output-section">
+						<div class="section-title">输出</div>
+						<div class="output-content active" id="psych-output"></div>
+						<button class="copy-btn" onclick="selectOutput('psych-output')">选择输出内容</button>
+
+						<div class="json-output-section" id="json-output-section">
+							<div class="section-title">JSON 配置文件</div>
+							<div class="output-content active" id="psych-json-output"></div>
+							<button class="copy-btn" onclick="selectOutput('psych-json-output')">选择JSON内容</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="splitter-container glass-effect glow-border" id="splitter-container">
+			<div class="conversion-type">
+				<div class="conversion-title">贴图帧分割</div>
+			</div>
+
+			<button class="back-btn enhanced-btn" onclick="goHome()">返回主页</button>
+
+			<div class="splitter-grid">
+				<div class="input-section">
+					<div class="section-title">输入文件</div>
+					
+					<div class="file-upload-section">
+						<input type="file" id="png-file-input" class="file-input" accept=".png">
+						<label for="png-file-input" class="file-label enhanced-btn">上传PNG图片</label>
+						<p id="png-file-name" class="upload-status"></p>
+					</div>
+					
+					<div class="file-upload-section">
+						<input type="file" id="xml-file-input" class="file-input" accept=".xml">
+						<label for="xml-file-input" class="file-label enhanced-btn">上传XML动画数据</label>
+						<p id="xml-file-name" class="upload-status"></p>
+					</div>
+					
+					<div id="animation-groups"></div>
+				</div>
+				
+				<div class="output-section">
+					<div class="section-title">动画预览</div>
+					
+					<div class="canvas-container">
+						<canvas id="animation-canvas" class="animation-canvas"></canvas>
+					</div>
+					
+					<div class="animation-controls">
+						<button class="control-btn enhanced-btn" id="play-btn" onclick="togglePlay()">播放</button>
+						<button class="control-btn enhanced-btn" id="stop-btn" onclick="stopAnimation()">停止</button>
+						<button class="control-btn enhanced-btn" id="prev-btn" onclick="prevFrame()">上一帧</button>
+						<button class="control-btn enhanced-btn" id="next-btn" onclick="nextFrame()">下一帧</button>
+						
+						<div class="fps-control">
+							<label for="fps-input">FPS:</label>
+							<input type="number" id="fps-input" class="fps-input enhanced-input" value="24" min="1" max="60">
+						</div>
+					</div>
+					
+					<button class="download-btn enhanced-btn" id="download-btn" onclick="downloadFrames()" disabled>下载分割图片(.zip)</button>
+				</div>
+			</div>
+		</div>
+
+		<div class="developing-container glass-effect glow-border" id="developing-container">
+			<div class="conversion-type">
+				<div class="conversion-title">正在研发中</div>
+			</div>
+
+			<button class="back-btn enhanced-btn" onclick="goHome()">返回主页</button>
+
+			<div class="developing-message">
+				<h2>新功能正在开发中</h2>
+				<p>我们正在努力开发更多实用功能，敬请期待！</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="settings-modal">
+		<div class="modal-content glass-effect glow-border">
+			<div class="modal-title">设置</div>
+
+			<div class="settings-tabs">
+				<div class="settings-tab active" onclick="openSettingsTab('function')">功能</div>
+				<div class="settings-tab" onclick="openSettingsTab('graphics')">画质</div>
+				<div class="settings-tab" onclick="openSettingsTab('credits')">制作人员</div>
+			</div>
+
+			<div class="settings-content active" id="function-settings">
+				<div class="checkbox-group">
+					<label class="checkbox-label">
+						<input type="checkbox" id="spaces-checkbox" class="checkbox-input" checked>
+						转换的文件带空格
+					</label>
+				</div>
+			</div>
+
+			<div class="settings-content" id="graphics-settings">
+				<div class="input-group">
+					<label for="quality-select">画质特效效果</label>
+					<select id="quality-select" class="enhanced-input" onchange="updateQuality()">
+						<option value="none">无特效</option>
+						<option value="low">低配</option>
+						<option value="medium" selected>中配</option>
+						<option value="high">高配</option>
+						<option value="ultra">炫酷极</option>
+					</select>
+				</div>
+
+				<div class="checkbox-group">
+					<label class="checkbox-label">
+						<input type="checkbox" id="particles-checkbox" class="checkbox-input">
+						粒子效果
+					</label>
+				</div>
+				
+				<div id="quality-warning" class="warning-message" style="display: none;">
+					⚠️ 炫酷极画质需要高性能设备，手机设备请勿开启！
+				</div>
+			</div>
+
+			<div class="settings-content" id="credits-settings">
+				<div class="modal-title">制作人员</div>
+				<ul class="credits-list">
+					<li class="credits-item">
+						<a href="https://b23.tv/qy8R56Q" class="credits-link" target="_blank">被晒成干的橙子</a>
+					</li>
+					<li class="credits-item">DeepSeek</li>
+				</ul>
+			</div>
+
+			<button class="close-btn enhanced-btn" onclick="closeSettings()">关闭</button>
+		</div>
+	</div>
+
+	<div class="notification" id="notification"></div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+	<script>
+		let currentEngine = 'codename';
+		let useSpaces = true;
+		let currentTool = 'home';
+		let particlesEnabled = false;
+		let qualityLevel = 'medium';
+		
+		let textureImage = null;
+		let frameData = [];
+		let animationGroups = {};
+		let currentFrame = 0;
+		let currentAnimation = '';
+		let isPlaying = false;
+		let animationInterval = null;
+
+		function init() {
+			document.getElementById('spaces-checkbox').addEventListener('change', function() {
+				useSpaces = this.checked;
+			});
+			
+			document.getElementById('particles-checkbox').addEventListener('change', function() {
+				particlesEnabled = this.checked;
+			});
+			
+			document.getElementById('quality-select').addEventListener('change', function() {
+				qualityLevel = this.value;
+				updateQuality();
+				
+				const warning = document.getElementById('quality-warning');
+				warning.style.display = qualityLevel === 'ultra' ? 'block' : 'none';
+			});
+			
+			document.getElementById('png-file-input').addEventListener('change', handlePngUpload);
+			document.getElementById('xml-file-input').addEventListener('change', handleXmlUpload);
+			
+			document.getElementById('fps-input').addEventListener('change', updateFps);
+		}
+
+		function updateQuality() {
+			document.body.classList.remove('quality-effect-none', 'quality-effect-low', 'quality-effect-medium', 'quality-effect-high', 'quality-effect-ultra');
+			document.body.classList.add('quality-effect-' + qualityLevel);
+		}
+
+		function selectTool(tool) {
+			if (tool === 'converter' || tool === 'splitter' || tool === 'developing') {
+				currentTool = tool;
+				document.getElementById('homepage').style.display = 'none';
+				document.getElementById('converter-container').style.display = 'none';
+				document.getElementById('splitter-container').style.display = 'none';
+				document.getElementById('developing-container').style.display = 'none';
+				
+				if (tool === 'converter') {
+					document.getElementById('converter-container').style.display = 'block';
+				} else if (tool === 'splitter') {
+					document.getElementById('splitter-container').style.display = 'block';
+				} else if (tool === 'developing') {
+					document.getElementById('developing-container').style.display = 'block';
+				}
+			}
+		}
+
+		function goHome() {
+			currentTool = 'home';
+			document.getElementById('homepage').style.display = 'block';
+			document.getElementById('converter-container').style.display = 'none';
+			document.getElementById('splitter-container').style.display = 'none';
+			document.getElementById('developing-container').style.display = 'none';
+		}
+
+		function selectEngine(engine) {
+			currentEngine = engine;
+
+			document.querySelectorAll('.engine-card').forEach(card => {
+				card.classList.remove('active');
+			});
+			event.currentTarget.classList.add('active');
+
+			document.querySelectorAll('.converter-container').forEach(container => {
+				container.classList.remove('active');
+			});
+			document.getElementById(engine + '-converter').classList.add('active');
+		}
+
+		function openSettingsTab(tab) {
+			document.querySelectorAll('.settings-tab').forEach(t => {
+				t.classList.remove('active');
+			});
+			document.querySelectorAll('.settings-content').forEach(c => {
+				c.classList.remove('active');
+			});
+			
+			event.currentTarget.classList.add('active');
+			document.getElementById(tab + '-settings').classList.add('active');
+		}
+
+		function openSettings() {
+			document.getElementById('settings-modal').classList.add('active');
+		}
+
+		function closeSettings() {
+			document.getElementById('settings-modal').classList.remove('active');
+		}
+
+		function updatePsychOutput() {
+			const type = document.getElementById('psych-conversion-type').value;
+			const input = document.getElementById('psych-input');
+			const jsonSection = document.getElementById('json-output-section');
+
+			if (type === 'xml-to-json') {
+				input.placeholder = '在此处粘贴人物 XML 数据';
+				jsonSection.classList.remove('active');
+			} else {
+				input.placeholder = '在此处粘贴舞台 XML 数据';
+				jsonSection.classList.add('active');
+			}
+
+			document.getElementById('psych-output').textContent = '';
+			document.getElementById('psych-json-output').textContent = '';
+		}
+
+		function convertCodename() {
+			const input = document.getElementById('codename-input').value.trim();
+			const output = document.getElementById('codename-output');
+
+			if (!input) {
+				output.textContent = '请输入JSON数据';
+				return;
+			}
+
+			try {
+				convertJSONtoXML(input, output);
+			} catch (error) {
+				output.textContent = '转换错误: ' + error.message;
+			}
+		}
+
+		function clearCodename() {
+			document.getElementById('codename-input').value = '';
+			document.getElementById('codename-output').textContent = '';
+		}
+
+		function convertPsych() {
+			const input = document.getElementById('psych-input').value.trim();
+			const output = document.getElementById('psych-output');
+			const jsonOutput = document.getElementById('psych-json-output');
+			const type = document.getElementById('psych-conversion-type').value;
+
+			if (!input) {
+				output.textContent = '请输入数据';
+				jsonOutput.textContent = '请输入数据';
+				return;
+			}
+
+			try {
+				if (type === 'xml-to-json') {
+					convertXMLtoJSON(input, output);
+					jsonOutput.textContent = '';
+				} else {
+					convertXMLtoLua(input, output);
+					convertXMLtoStageJSON(input, jsonOutput);
+				}
+			} catch (error) {
+				const errorMsg = '转换错误: ' + error.message;
+				output.textContent = errorMsg;
+				jsonOutput.textContent = errorMsg;
+			}
+		}
+
+		function clearPsych() {
+			document.getElementById('psych-input').value = '';
+			document.getElementById('psych-output').textContent = '';
+			document.getElementById('psych-json-output').textContent = '';
+		}
+
+		function selectOutput(outputId) {
+			const outputElement = document.getElementById(outputId);
+			const range = document.createRange();
+			range.selectNodeContents(outputElement);
+			const selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(range);
+		}
+
+		function convertXMLtoJSON(xmlInput, output) {
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(xmlInput, 'text/xml');
+
+			if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+				output.textContent = 'XML格式错误';
+				return;
+			}
+
+			const character = xmlDoc.getElementsByTagName('character')[0];
+			if (!character) {
+				output.textContent = '未找到character标签';
+				return;
+			}
+
+			const y = parseInt(character.getAttribute('y')) || 0;
+			const x = parseInt(character.getAttribute('x')) || 0;
+			const sprite = character.getAttribute('sprite') || '';
+			const flipX = character.getAttribute('flipX') === 'true';
+			const isPlayer = character.getAttribute('isPlayer') === 'true';
+			const icon = character.getAttribute('icon') || '';
+			const color = character.getAttribute('color') || '#FFFFFF';
+			const holdTime = parseInt(character.getAttribute('holdTime')) || 4;
+			const camx = parseInt(character.getAttribute('camx')) || 0;
+			const camy = parseInt(character.getAttribute('camy')) || 0;
+
+			const hexColor = color.replace('#', '');
+			const r = parseInt(hexColor.substr(0, 2), 16);
+			const g = parseInt(hexColor.substr(2, 2), 16);
+			const b = parseInt(hexColor.substr(4, 2), 16);
+
+			const animElements = character.getElementsByTagName('anim');
+			const animations = [];
+
+			for (let i = 0; i < animElements.length; i++) {
+				const anim = animElements[i];
+				const indicesAttr = anim.getAttribute('indices');
+				const indices = indicesAttr ? indicesAttr.split(',').map(idx => parseInt(idx.trim())) : [];
+
+				animations.push({
+					name: anim.getAttribute('anim') || '',
+					anim: anim.getAttribute('name') || '',
+					fps: parseInt(anim.getAttribute('fps')) || 24,
+					loop: anim.getAttribute('loop') !== 'false',
+					indices: indices,
+					offsets: [
+						parseInt(anim.getAttribute('x')) || 0,
+						parseInt(anim.getAttribute('y')) || 0
+					]
+				});
+			}
+
+			const jsonResult = {
+				animations: animations,
+				vocals_file: "",
+				no_antialiasing: false,
+				image: `characters/${sprite}`,
+				position: [x, y],
+				healthicon: icon,
+				flip_x: flipX,
+				healthbar_colors: [r, g, b],
+				camera_position: [camx, camy],
+				sing_duration: holdTime,
+				scale: 1,
+				_editor_isPlayer: isPlayer
+			};
+
+			output.textContent = JSON.stringify(jsonResult, null, useSpaces ? '\t' : null);
+		}
+
+		function convertJSONtoXML(jsonInput, output) {
+			const jsonData = JSON.parse(jsonInput);
+
+			let xml = '<!DOCTYPE codename-engine-character>\n';
+			xml += '<character';
+
+			xml += ` y="${jsonData.position[1] || 0}"`;
+			xml += ` x="${jsonData.position[0] || 0}"`;
+			xml += ` sprite="${jsonData.image.replace('characters/', '')}"`;
+			xml += ` flipX="${jsonData.flip_x}"`;
+			xml += ` isPlayer="${jsonData._editor_isPlayer}"`;
+			xml += ` icon="${jsonData.healthicon}"`;
+
+			const colors = jsonData.healthbar_colors || [255, 255, 255];
+			const hexColor = '#' + 
+				(colors[0] || 255).toString(16).padStart(2, '0') +
+				(colors[1] || 255).toString(16).padStart(2, '0') +
+				(colors[2] || 255).toString(16).padStart(2, '0');
+			xml += ` color="${hexColor.toUpperCase()}"`;
+
+			xml += ` camx="${jsonData.camera_position[0] || 0}"`;
+			xml += ` camy="${jsonData.camera_position[1] || 0}"`;
+			xml += ` holdTime="${jsonData.sing_duration || 4}"`;
+			xml += '>\n';
+
+			jsonData.animations.forEach(anim => {
+				xml += `\t<anim name="${anim.name || ''}" anim="${anim.anim || ''}" x="${anim.offsets[0] || 0}" y="${anim.offsets[1] || 0}" fps="${anim.fps || 24}" loop="${anim.loop}"`;
+
+				if (anim.indices && anim.indices.length > 0) {
+					xml += ` indices="${anim.indices.join(',')}"`;
+				}
+
+				xml += '/>\n';
+			});
+
+			xml += '</character>';
+
+			output.textContent = xml;
+		}
+
+		function convertXMLtoLua(xmlInput, output) {
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(xmlInput, 'text/xml');
+
+			if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+				output.textContent = 'XML格式错误';
+				return;
+			}
+
+			const stage = xmlDoc.getElementsByTagName('stage')[0];
+			if (!stage) {
+				output.textContent = '未找到stage标签';
+				return;
+			}
+
+			const folder = stage.getAttribute('folder') || '';
+			const zoom = stage.getAttribute('zoom') || '0.9';
+
+			let luaCode = 'function onCreate()\n\n';
+
+			const sprites = stage.getElementsByTagName('sprite');
+			for (let i = 0; i < sprites.length; i++) {
+				const sprite = sprites[i];
+				const spriteName = sprite.getAttribute('name') || `sprite${i}`;
+				const spriteFile = sprite.getAttribute('sprite') || '';
+				const x = sprite.getAttribute('x') || '0';
+				const y = sprite.getAttribute('y') || '0';
+				const scale = sprite.getAttribute('scale') || '1';
+				const scaleX = sprite.getAttribute('scalex') || scale;
+				const scaleY = sprite.getAttribute('scaley') || scale;
+				const spriteType = sprite.getAttribute('type') || 'normal';
+
+				if (spriteType === 'none') {
+					luaCode += `makeLuaSprite('${spriteName}', '', ${x}, ${y})\n`;
+					luaCode += `makeGraphic('${spriteName}', 100, 100, 'FFFFFF')\n`;
+				} else {
+					luaCode += `makeLuaSprite('${spriteName}', '${folder}${spriteFile}', ${x}, ${y})\n`;
+				}
+
+				if (scaleX !== '1' || scaleY !== '1') {
+					luaCode += `scaleObject('${spriteName}', ${scaleX}, ${scaleY})\n`;
+				}
+				luaCode += `addLuaSprite('${spriteName}', false)\n\n`;
+
+				const anims = sprite.getElementsByTagName('anim');
+				if (anims.length > 0) {
+					luaCode += `makeAnimatedLuaSprite('${spriteName}', '${folder}${spriteFile}', ${x}, ${y})\n`;
+					for (let j = 0; j < anims.length; j++) {
+						const anim = anims[j];
+						const animName = anim.getAttribute('name') || 'idle';
+						const animLoop = anim.getAttribute('loop') === 'true' ? 'true' : 'false';
+						const animFps = anim.getAttribute('fps') || '24';
+
+						luaCode += `addAnimationByPrefix('${spriteName}', '${animName}', '${animName}', ${animFps}, ${animLoop})\n`;
+					}
+					luaCode += `playAnim('${spriteName}', 'idle', true)\n\n`;
+				}
+			}
+
+			const boyfriend = stage.getElementsByTagName('boyfriend')[0];
+			if (boyfriend) {
+				const bfScale = boyfriend.getAttribute('scale');
+				if (bfScale && bfScale !== '1') {
+					luaCode += `setProperty('boyfriend.scale.x', ${bfScale})\n`;
+					luaCode += `setProperty('boyfriend.scale.y', ${bfScale})\n`;
+				}
+			}
+
+			const dad = stage.getElementsByTagName('dad')[0];
+			if (dad) {
+				const dadScale = dad.getAttribute('scale');
+				if (dadScale && dadScale !== '1') {
+					luaCode += `setProperty('dad.scale.x', ${dadScale})\n`;
+					luaCode += `setProperty('dad.scale.y', ${dadScale})\n`;
+				}
+			}
+
+			const girlfriend = stage.getElementsByTagName('girlfriend')[0];
+			if (girlfriend) {
+				const gfScale = girlfriend.getAttribute('scale');
+				if (gfScale && gfScale !== '1') {
+					luaCode += `setProperty('gf.scale.x', ${gfScale})\n`;
+					luaCode += `setProperty('gf.scale.y', ${gfScale})\n`;
+				}
+			}
+
+			luaCode += 'end';
+
+			output.textContent = luaCode;
+		}
+
+		function convertXMLtoStageJSON(xmlInput, output) {
+			const parser = new DOMParser();
+			const xmlDoc = parser.parseFromString(xmlInput, 'text/xml');
+
+			if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+				output.textContent = 'XML格式错误';
+				return;
+			}
+
+			const stage = xmlDoc.getElementsByTagName('stage')[0];
+			if (!stage) {
+				output.textContent = '未找到stage标签';
+				return;
+			}
+
+			const folder = stage.getAttribute('folder') || '';
+			const zoom = stage.getAttribute('zoom') || '0.75';
+
+			let boyfriendPos = [770, 100];
+			let girlfriendPos = [200, 130];
+			let opponentPos = [-350, 250];
+
+			let cameraBoyfriend = [0, 0];
+			let cameraGirlfriend = [0, 0];
+			let cameraOpponent = [0, 0];
+
+			const boyfriend = stage.getElementsByTagName('boyfriend')[0];
+			if (boyfriend) {
+				const bfX = parseInt(boyfriend.getAttribute('x')) || 770;
+				const bfY = parseInt(boyfriend.getAttribute('y')) || 100;
+				boyfriendPos = [bfX, bfY];
+
+				const bfCamX = parseInt(boyfriend.getAttribute('camxoffset')) || 0;
+				const bfCamY = parseInt(boyfriend.getAttribute('camyoffset')) || 0;
+				cameraBoyfriend = [bfCamX, bfCamY];
+			}
+			const dad = stage.getElementsByTagName('dad')[0];
+			if (dad) {
+				const dadX = parseInt(dad.getAttribute('x')) || -350;
+				const dadY = parseInt(dad.getAttribute('y')) || 250;
+				opponentPos = [dadX, dadY];
+				const dadCamX = parseInt(dad.getAttribute('camxoffset')) || 0;
+				const dadCamY = parseInt(dad.getAttribute('camyoffset')) || 0;
+				cameraOpponent = [dadCamX, dadCamY];
+			}
+			const girlfriend = stage.getElementsByTagName('girlfriend')[0];
+			if (girlfriend) {
+				const gfX = parseInt(girlfriend.getAttribute('x')) || 200;
+				const gfY = parseInt(girlfriend.getAttribute('y')) || 130;
+				girlfriendPos = [gfX, gfY];
+				const gfCamX = parseInt(girlfriend.getAttribute('camxoffset')) || 0;
+				const gfCamY = parseInt(girlfriend.getAttribute('camyoffset')) || 0;
+				cameraGirlfriend = [gfCamX, gfCamY];
+			}
+			const stageJSON = {
+				"directory": folder,
+				"defaultZoom": parseFloat(zoom),
+				"isPixelStage": false,
+				"boyfriend": boyfriendPos,
+				"girlfriend": girlfriendPos,
+				"opponent": opponentPos,
+				"hide_girlfriend": false,
+				"camera_boyfriend": cameraBoyfriend,
+				"camera_opponent": cameraOpponent,
+				"camera_girlfriend": cameraGirlfriend,
+				"camera_speed": 1
+			};
+			output.textContent = JSON.stringify(stageJSON, null, useSpaces ? '\t' : null);
+		}
+
+		function handlePngUpload(event) {
+			const file = event.target.files[0];
+			if (!file) return;
+			
+			const fileName = document.getElementById('png-file-name');
+			fileName.textContent = `已选择: ${file.name}`;
+			
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				textureImage = new Image();
+				textureImage.onload = function() {
+					showNotification('PNG图片加载成功');
+					updateDownloadButton();
+					if (frameData.length > 0) {
+						renderCurrentFrame();
+					}
+				};
+				textureImage.src = e.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
+		
+		function handleXmlUpload(event) {
+			const file = event.target.files[0];
+			if (!file) return;
+
+			const fileName = document.getElementById('xml-file-name');
+			fileName.textContent = `已选择: ${file.name}`;
+			
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				try {
+					const parser = new DOMParser();
+					const xmlDoc = parser.parseFromString(e.target.result, 'text/xml');
+					
+					if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+						throw new Error('XML格式错误');
+					}
+					
+					frameData = [];
+					animationGroups = {};
+					const subTextures = xmlDoc.getElementsByTagName('SubTexture');
+					
+					for (let i = 0; i < subTextures.length; i++) {
+						const subTexture = subTextures[i];
+						const frameName = subTexture.getAttribute('name');
+
+						frameData.push({
+							name: frameName,
+							x: parseInt(subTexture.getAttribute('x')) || 0,
+							y: parseInt(subTexture.getAttribute('y')) || 0,
+							width: parseInt(subTexture.getAttribute('width')) || 0,
+							height: parseInt(subTexture.getAttribute('height')) || 0,
+							frameX: Math.abs(parseInt(subTexture.getAttribute('frameX')) || 0),
+							frameY: Math.abs(parseInt(subTexture.getAttribute('frameY')) || 0),
+							frameWidth: parseInt(subTexture.getAttribute('frameWidth')) || 0,
+							frameHeight: parseInt(subTexture.getAttribute('frameHeight')) || 0
+						});
+						
+						const animationName = extractAnimationName(frameName);
+						if (!animationGroups[animationName]) {
+							animationGroups[animationName] = [];
+						}
+						animationGroups[animationName].push(frameData.length - 1);
+					}
+					
+					updateAnimationGroups();
+					showNotification('XML动画数据加载成功');
+					updateDownloadButton();
+					
+					if (textureImage) {
+						if (Object.keys(animationGroups).length > 0) {
+							currentAnimation = Object.keys(animationGroups)[0];
+							currentFrame = animationGroups[currentAnimation][0];
+							renderCurrentFrame();
+						}
+					}
+				} catch (error) {
+					fileName.textContent = 'XML文件解析错误: ' + error.message;
+					showNotification('XML文件解析错误');
+				}
+			};
+			reader.readAsText(file);
+		}
+
+		function extractAnimationName(frameName) {
+			if (!frameName) return '未知动画';
+
+			const patterns = [
+				/^(.*?)\s+\d+$/,
+				/^(.*?)_\d+$/,
+				/^(.*?)-\d+$/
+			];
+			
+			for (const pattern of patterns) {
+				const match = frameName.match(pattern);
+				if (match) {
+					return match[1];
+				}
+			}
+
+			return frameName;
+		}
+
+		function updateAnimationGroups() {
+			const groupsContainer = document.getElementById('animation-groups');
+			groupsContainer.innerHTML = '';
+			
+			Object.keys(animationGroups).forEach(animationName => {
+				const groupDiv = document.createElement('div');
+				groupDiv.className = 'animation-group';
+				
+				const headerDiv = document.createElement('div');
+				headerDiv.className = 'animation-header';
+				headerDiv.onclick = () => toggleAnimationGroup(headerDiv);
+				
+				const nameSpan = document.createElement('span');
+				nameSpan.className = 'animation-name';
+				nameSpan.textContent = animationName;
+				
+				const toggleSpan = document.createElement('span');
+				toggleSpan.className = 'toggle-icon';
+				toggleSpan.textContent = '∨';
+				
+				headerDiv.appendChild(nameSpan);
+				headerDiv.appendChild(toggleSpan);
+				
+				const frameListDiv = document.createElement('div');
+				frameListDiv.className = 'frame-list';
+				
+				animationGroups[animationName].forEach(frameIndex => {
+					const frameItem = document.createElement('div');
+					frameItem.className = 'frame-item';
+					if (currentAnimation === animationName && currentFrame === frameIndex) {
+						frameItem.classList.add('active');
+					}
+					frameItem.textContent = frameData[frameIndex].name;
+					frameItem.onclick = (e) => {
+						e.stopPropagation();
+						selectFrame(animationName, frameIndex);
+					};
+					frameListDiv.appendChild(frameItem);
+				});
+				
+				groupDiv.appendChild(headerDiv);
+				groupDiv.appendChild(frameListDiv);
+				groupsContainer.appendChild(groupDiv);
+			});
+		}
+
+		function toggleAnimationGroup(headerElement) {
+			const isActive = headerElement.classList.contains('active');
+			
+			document.querySelectorAll('.animation-header').forEach(header => {
+				header.classList.remove('active');
+			});
+			
+			if (!isActive) {
+				headerElement.classList.add('active');
+			}
+		}
+
+		function selectFrame(animationName, frameIndex) {
+			currentAnimation = animationName;
+			currentFrame = frameIndex;
+			renderCurrentFrame();
+			updateAnimationGroups();
+		}
+
+		function renderCurrentFrame() {
+			if (!textureImage || frameData.length === 0) return;
+			
+			const canvas = document.getElementById('animation-canvas');
+			const ctx = canvas.getContext('2d');
+			
+			const frame = frameData[currentFrame];
+
+			const displayWidth = frame.frameWidth > 0 ? frame.frameWidth : frame.width;
+			const displayHeight = frame.frameHeight > 0 ? frame.frameHeight : frame.height;
+			
+			canvas.width = displayWidth;
+			canvas.height = displayHeight;
+
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			ctx.fillStyle = 'transparent';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+			
+			const sourceX = frame.x;
+			const sourceY = frame.y;
+			const sourceWidth = frame.width;
+			const sourceHeight = frame.height;
+			
+			const destX = frame.frameX || 0;
+			const destY = frame.frameY || 0;
+			const destWidth = frame.width;
+			const destHeight = frame.height;
+
+			ctx.drawImage(
+				textureImage,
+				sourceX, sourceY, sourceWidth, sourceHeight,
+				destX, destY, destWidth, destHeight
+			);
+		}
+
+		function togglePlay() {
+			if (isPlaying) {
+				stopAnimation();
+			} else {
+				playAnimation();
+			}
+		}
+
+		function playAnimation() {
+			if (frameData.length === 0 || !currentAnimation) return;
+			
+			isPlaying = true;
+			document.getElementById('play-btn').textContent = '暂停';
+			
+			const fps = parseInt(document.getElementById('fps-input').value) || 24;
+			const interval = 1000 / fps;
+			
+			animationInterval = setInterval(() => {
+				const currentGroup = animationGroups[currentAnimation];
+				const currentIndex = currentGroup.indexOf(currentFrame);
+				const nextIndex = (currentIndex + 1) % currentGroup.length;
+				currentFrame = currentGroup[nextIndex];
+				renderCurrentFrame();
+				updateAnimationGroups();
+			}, interval);
+		}
+
+		function stopAnimation() {
+			isPlaying = false;
+			document.getElementById('play-btn').textContent = '播放';
+			
+			if (animationInterval) {
+				clearInterval(animationInterval);
+				animationInterval = null;
+			}
+		}
+
+		function prevFrame() {
+			if (frameData.length === 0 || !currentAnimation) return;
+			
+			stopAnimation();
+			const currentGroup = animationGroups[currentAnimation];
+			const currentIndex = currentGroup.indexOf(currentFrame);
+			const prevIndex = (currentIndex - 1 + currentGroup.length) % currentGroup.length;
+			currentFrame = currentGroup[prevIndex];
+			renderCurrentFrame();
+			updateAnimationGroups();
+		}
+
+		function nextFrame() {
+			if (frameData.length === 0 || !currentAnimation) return;
+			
+			stopAnimation();
+			const currentGroup = animationGroups[currentAnimation];
+			const currentIndex = currentGroup.indexOf(currentFrame);
+			const nextIndex = (currentIndex + 1) % currentGroup.length;
+			currentFrame = currentGroup[nextIndex];
+			renderCurrentFrame();
+			updateAnimationGroups();
+		}
+
+		function updateFps() {
+			if (isPlaying) {
+				stopAnimation();
+				playAnimation();
+			}
+		}
+
+		function updateDownloadButton() {
+			const downloadBtn = document.getElementById('download-btn');
+			downloadBtn.disabled = !(textureImage && frameData.length > 0);
+		}
+
+		async function downloadFrames() {
+			if (!textureImage || frameData.length === 0) return;
+			
+			showNotification('正在生成ZIP文件，请稍候...');
+			
+			const zip = new JSZip();
+			const canvas = document.createElement('canvas');
+			const ctx = canvas.getContext('2d');
+			
+			for (let i = 0; i < frameData.length; i++) {
+				const frame = frameData[i];
+				const displayWidth = frame.frameWidth > 0 ? frame.frameWidth : frame.width;
+				const displayHeight = frame.frameHeight > 0 ? frame.frameHeight : frame.height;
+				
+				canvas.width = displayWidth;
+				canvas.height = displayHeight;
+				
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = 'transparent';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				const sourceX = frame.x;
+				const sourceY = frame.y;
+				const sourceWidth = frame.width;
+				const sourceHeight = frame.height;
+
+				const destX = frame.frameX || 0;
+				const destY = frame.frameY || 0;
+				const destWidth = frame.width;
+				const destHeight = frame.height;
+
+				ctx.drawImage(
+					textureImage,
+					sourceX, sourceY, sourceWidth, sourceHeight,
+					destX, destY, destWidth, destHeight
+				);
+				
+				const blob = await new Promise(resolve => {
+					canvas.toBlob(resolve, 'image/png');
+				});
+				
+				const fileName = `${frame.name || `frame_${i}`}.png`;
+				zip.file(fileName, blob);
+			}
+			
+			const content = await zip.generateAsync({type: 'blob'});
+			saveAs(content, 'split_frames.zip');
+			showNotification('ZIP文件下载完成！');
+		}
+
+		function showNotification(message) {
+			const notification = document.getElementById('notification');
+			notification.textContent = message;
+			notification.classList.add('active');
+			
+			setTimeout(() => {
+				notification.classList.remove('active');
+			}, 3000);
+		}
+
+		function initSplitter() {
+			document.getElementById('png-file-input').addEventListener('change', handlePngUpload);
+			document.getElementById('xml-file-input').addEventListener('change', handleXmlUpload);
+			document.getElementById('fps-input').addEventListener('change', updateFps);
+		}
+
+		window.onload = function() {
+			init();
+			initSplitter();
+		};
+	</script>
+</body>
+</html>
