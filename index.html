@@ -1349,7 +1349,7 @@
 			xml += '>\n';
 
 			jsonData.animations.forEach(anim => {
-				xml += `\t<anim name="${anim.name || ''}" anim="${anim.anim || ''}" x="${anim.offsets[0] || 0}" y="${anim.offsets[1] || 0}" fps="${anim.fps || 24}" loop="${anim.loop}"`;
+				xml += `\t<anim name="${anim.anim || ''}" anim="${anim.name || ''}" x="${anim.offsets[0] || 0}" y="${anim.offsets[1] || 0}" fps="${anim.fps || 24}" loop="${anim.loop}"`;
 
 				if (anim.indices && anim.indices.length > 0) {
 					xml += ` indices="${anim.indices.join(',')}"`;
